@@ -19,7 +19,7 @@ d3.json("menu.json").then((data) => {
     .attr("transform", `translate(0,${graphHeight})`);
   const yAixGroup = graph.append("g");
 
-  const y = d3.scaleLinear().domain([0, max]).range([0, graphHeight]);
+  const y = d3.scaleLinear().domain([0, max]).range([graphHeight, 0]);
   const x = d3
     .scaleBand()
     .domain(data.map((item) => item.name))
@@ -33,22 +33,34 @@ d3.json("menu.json").then((data) => {
     .attr("width", x.bandwidth)
     .attr("height", (d) => y(d.orders))
     .attr("fill", "orange")
-    .attr("x", (d) => x(d.name));
+    .attr("x", (d) => x(d.name))
+    .attr("y", (d) => y(d.orders));
 
   rects
     .enter()
     .append("rect")
     .attr("width", x.bandwidth)
-    .attr("height", (d) => y(d.orders))
+    .attr("height", (d) => graphHeight - y(d.orders))
     .attr("fill", "orange")
-    .attr("x", (d) => x(d.name));
+    .attr("x", (d) => x(d.name))
+    .attr("y", (d) => y(d.orders));
 
   // Create and call axis
   const xAxis = d3.axisBottom(x);
-  const yAxis = d3.axisLeft(y);
+
+  const yAxis = d3
+    .axisLeft(y)
+    .ticks(3)
+    .tickFormat((d) => d + " orders");
 
   xAixGroup.call(xAxis);
   yAixGroup.call(yAxis);
+
+  xAixGroup
+    .selectAll("text")
+    .attr("transform", "rotate(-40)")
+    .attr("text-anchor", "end")
+    .attr("fill", "blue");
 });
 
 // d3.json("./planets.json").then((data) => {
